@@ -1,3 +1,5 @@
+import sys
+
 def new_board():
   #return a new board state
   return [[None for i in range(3)] for i in range(3)]
@@ -21,48 +23,116 @@ def render(board):
   print("\n".join(lines))
   print("  ------- ")
 
-def main():
-  board = new_board()
-  print(board)
-  dummy_board = [
-    ['X', None, 'O'],
-    ['O', None, None],
-    [None, 'X', 'X']
+
+def get_move():
+  x_coord = input("What is your move's X co-ordinate?: ")
+  y_coord = input("What is your move's Y co-ordinate?: ")
+
+  if int(x_coord) < 0 or int(x_coord) > 2 or int(y_coord) < 0 or int(y_coord) > 2:
+    print("Error: Invalid input! Co-ordinates must have a value between 0 and 2.")
+    sys.exit(0)
+
+  return (x_coord, y_coord)
+
+def is_valid_move(board, coordinates):
+  x_coord = int(coordinates[0])
+  y_coord = int(coordinates[1])
+  
+  if board[x_coord][y_coord] is not None:
+    print("Error! Can't make move ({},{}), square already taken!".format(coordinates[0], coordinates[1]))
+    sys.exit(0)
+
+  return True
+
+def make_move(board, coordinates, user_move):
+
+  is_valid_move(board ,coordinates)
+
+  x_coord = int(coordinates[0])
+  y_coord = int(coordinates[1])
+
+  board[x_coord][y_coord] = user_move
+
+
+def get_coord_count():
+  rows = []
+  for i in range(0,3):
+    row = []
+    for j in range(0,3):
+      row.append((i,j))
+    rows.append(row)
+
+  cols = []
+  for i in range(0,3):
+    col = []
+    for j in range(0,3):
+      col.append((j,i))
+    cols.append(col)
+
+  diagonals = [
+    [(0, 0), (1, 1), (2, 2)],
+    [(0, 2), (1, 1), (2, 0)]
   ]
-  render(dummy_board)
 
-  # Loop through turns until the game is over
-  # loop forever:
-  #   # TODO: hmm I'm not sure how best to do this
-  #   # right now. No problem, I'll come back later.
-  #   current_player = ???
+  return rows + cols + diagonals
 
-  #   # Print the current state of the board
-  #   render(board)
+  
 
-  #   # Get the move that the current player is going
-  #   # to make.
-  #   move_co_ords = get_move()
+def has_winner(board):
+  grouped_coords = get_coord_count()
 
-  #   # Make the move that we calculated above
-  #   make_move(board, move_co_ords, current_player)
+  for line in grouped_coords:
+    board_values = []
+    for (x,y) in line:
+      board_values.append(board[x][y])
+    if len(set(board_values)) == 1 and board_values[0] is not None:
+        return board_values[0]
 
-  #   # Work out if there's a winner
-  #   winner = get_winner(board)
+  return None
 
-  #   # If there is a winner, crown them the champion
-  #   # and exit the loop.
-  #   if winner is not None:
-  #     print "WINNER IS %s!!" % winner
-  #     break
 
-  #   # If there is no winner and the board is full,
-  #   # exit the loop.
-  #   if is_board_full(board):
-  #     print "IT'S A DRAW!!"
-  #     break
+def is_board_full(board):
+  for row in board:
+    for col in row:
+      if col is None:
+        return False
+  
+  return True
 
-    # Repeat until the game is over
+
+def main():
+  allowed_states = [
+    "X",
+    "O"
+  ]
+
+  player_id = 0
+
+  board = new_board()
+
+  move_coords = None
+
+  while True:
+
+    render(board)
+    move_coords = get_move()
+
+    user_move = allowed_states[player_id % 2]
+
+    make_move(board, move_coords, user_move)
+
+    winner = has_winner(board)
+    if winner:
+      render(board)
+      print("The WINNER is {}".format(winner))
+      break
+
+    if is_board_full(board):
+      render(board)
+      print("It is a DRAW!")
+      break
+
+    player_id += 1
 
 if __name__ == "__main__":
     main()
