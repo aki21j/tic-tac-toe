@@ -1,4 +1,5 @@
 import sys
+from colorama import Fore,Style
 
 def new_board():
   #return a new board state
@@ -7,21 +8,22 @@ def new_board():
 def render(board):
   display_states = {
     None: " ",
-    "X": "X",
-    "O": "O"
+    "X": Fore.GREEN + "X",
+    "O": Fore.YELLOW + "O"
   }
 
   lines = []
-  print("   0 1 2 ")
-  print("  ------- ")
+  print(Fore.LIGHTWHITE_EX + "   0 1 2 ")
+  print(Fore.LIGHTWHITE_EX + "  ------- ")
   for k,row in enumerate(board):
-    line = str(k)+"|"
+    line = Fore.LIGHTWHITE_EX + str(k)+"|"
     for col in row:
       line += " " + display_states[col]
-    line += " |"
+    line += Fore.LIGHTWHITE_EX + " |"
     lines.append(line)
   print("\n".join(lines))
-  print("  ------- ")
+  print(Fore.LIGHTWHITE_EX + "  ------- ")
+  print(Style.RESET_ALL)
 
 
 def get_move():
@@ -101,6 +103,18 @@ def is_board_full(board):
 
 
 def main():
+
+  user_0 = input("Enter Player 1's name: ")
+  user_1 = input("Enter Player 2's name: ")
+
+  print("Player 1 will use X")
+  print("Player 2 will use O")
+
+  user_player_map = {
+    "X": user_0,
+    "O": user_1
+  }
+
   allowed_states = [
     "X",
     "O"
@@ -124,15 +138,18 @@ def main():
     winner = has_winner(board)
     if winner:
       render(board)
-      print("The WINNER is {}".format(winner))
+      print(Fore.GREEN + "The WINNER is {}!".format(user_player_map[winner]))
       break
 
     if is_board_full(board):
       render(board)
-      print("It is a DRAW!")
+      print(Fore.MAGENTA + "It is a DRAW!")
       break
 
     player_id += 1
+  
+  print(Style.RESET_ALL)
+
 
 if __name__ == "__main__":
     main()
