@@ -1,5 +1,12 @@
 import sys
 from colorama import Fore,Style
+import random
+
+AVAILABLE_GAME_MODES = {
+  "SINGLE_PLAYER": "single_player",
+  "TWO_PLAYER": "two_player"
+}
+
 
 def new_board():
   #return a new board state
@@ -26,7 +33,16 @@ def render(board):
   print(Style.RESET_ALL)
 
 
-def get_move():
+def get_all_available_moves(board):
+  legal_moves = []
+  for x, row in enumerate(board):
+    for y, val in enumerate(row):
+      if val is None:
+        legal_moves.append((x, y))
+  return legal_moves
+
+
+def get_human_moves():
   x_coord = input("What is your move's X co-ordinate?: ")
   y_coord = input("What is your move's Y co-ordinate?: ")
 
@@ -35,6 +51,19 @@ def get_move():
     sys.exit(0)
 
   return (x_coord, y_coord)
+
+
+def get_ai_move(board):
+  available_moves = get_all_available_moves(board)
+  return random.choice(available_moves)
+
+
+def get_move(board, mode, player_id):
+  if mode == AVAILABLE_GAME_MODES["SINGLE_PLAYER"] and player_id % 2 != 0:
+    return get_ai_move(board)
+  elif mode == AVAILABLE_GAME_MODES["TWO_PLAYER"] or player_id % 2 == 0:
+    return get_human_moves()
+
 
 def is_valid_move(board, coordinates):
   x_coord = int(coordinates[0])
@@ -101,11 +130,29 @@ def is_board_full(board):
   
   return True
 
+def select_mode():
+  user_inp = input("Enter 0 for Single player or 1 for Two player mode: ")
+
+  if int(user_inp) > 1:
+    print("Invalid input! Please enter a valid input!")
+    sys.exit(0)
+  if int(user_inp) == 0:
+    return AVAILABLE_GAME_MODES["SINGLE_PLAYER"]  
+    
+  return AVAILABLE_GAME_MODES["TWO_PLAYER"]
+
 
 def main():
 
+  selected_mode = select_mode()
   user_0 = input("Enter Player 1's name: ")
-  user_1 = input("Enter Player 2's name: ")
+
+  print(selected_mode)
+
+  if selected_mode == AVAILABLE_GAME_MODES["SINGLE_PLAYER"]:
+    user_1 = "Zelda"
+  else:
+    user_1 = input("Enter Player 2's name: ")
 
   print("Player 1 will use X")
   print("Player 2 will use O")
@@ -129,7 +176,7 @@ def main():
   while True:
 
     render(board)
-    move_coords = get_move()
+    move_coords = get_move(board, selected_mode, player_id)
 
     user_move = allowed_states[player_id % 2]
 
@@ -152,4 +199,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+  
+  main()
