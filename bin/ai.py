@@ -9,6 +9,17 @@ def finds_winning_moves_ai(board, player_state):
   
   return random_move(board)
 
+def blocks_winning_moves_ai(board, player_state, block_state):
+  to_block = get_winning_move(board, block_state)
+  winning_move = get_winning_move(board, player_state)
+
+  if to_block:
+    return to_block
+  elif winning_move:
+    return winning_move
+  
+  return random_move(board)
+
 def get_winning_move(board, player_state):
   grouped_coords = get_coord_count()
 

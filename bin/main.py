@@ -6,6 +6,7 @@ from utils import get_coord_count
 AVAILABLE_GAME_MODES = {
   "RANDOM_CHOICE_AI": "RANDOM_CHOICE_AI",
   "WINNING_MOVE_AI": "WINNING_MOVE_AI",
+  "BLOCK_WINNING_MOVE_AI": "BLOCK_WINNING_MOVE_AI",
   "TWO_PLAYER": "TWO_PLAYER"
 }
 
@@ -56,6 +57,14 @@ def get_move(board, mode, player_id):
       return ai.random_move(board)
     elif mode == AVAILABLE_GAME_MODES["WINNING_MOVE_AI"]:
       return ai.finds_winning_moves_ai(board, allowed_states[player_id % 2])
+    elif mode == AVAILABLE_GAME_MODES["BLOCK_WINNING_MOVE_AI"]:
+      my_move =  allowed_states[player_id % 2]
+      block_move = allowed_states[0]
+    
+      if my_move == allowed_states[0]:
+        block_move = allowed_states[1]
+      
+      return ai.blocks_winning_moves_ai(board, my_move, block_move)
   elif mode == AVAILABLE_GAME_MODES["TWO_PLAYER"] or player_id % 2 == 0:
     return get_human_moves()
 
@@ -102,15 +111,17 @@ def is_board_full(board):
   return True
 
 def select_mode():
-  user_inp = input("Enter 0 for Random choice AI,1 for Winning Moves AI and 2 for Two player mode: ")
+  user_inp = input("Enter 0 for Random choice AI,1 for Winning Moves AI, 2 for Block winning moves AI and 3 for Two player mode: ")
 
-  if int(user_inp) > 2:
+  if int(user_inp) > 3:
     print("Invalid input! Please enter a valid input!")
     sys.exit(0)
   if int(user_inp) == 0:
     return AVAILABLE_GAME_MODES["RANDOM_CHOICE_AI"]
   elif int(user_inp) == 1:
     return AVAILABLE_GAME_MODES["WINNING_MOVE_AI"]
+  elif int(user_inp) == 2:
+    return AVAILABLE_GAME_MODES["BLOCK_WINNING_MOVE_AI"]
   else:
     return AVAILABLE_GAME_MODES["TWO_PLAYER"]
 
