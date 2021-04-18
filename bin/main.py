@@ -1,12 +1,21 @@
 import sys
 from colorama import Fore,Style
-import random
+import ai
+from utils import get_coord_count
+import minimax
 
 AVAILABLE_GAME_MODES = {
-  "SINGLE_PLAYER": "single_player",
-  "TWO_PLAYER": "two_player"
+  "RANDOM_CHOICE_AI": "RANDOM_CHOICE_AI",
+  "WINNING_MOVE_AI": "WINNING_MOVE_AI",
+  "BLOCK_WINNING_MOVE_AI": "BLOCK_WINNING_MOVE_AI",
+  "MINIMAX_AI": "MINIMAX_AI",
+  "TWO_PLAYER": "TWO_PLAYER"
 }
 
+allowed_states = [
+  "X",
+  "O"
+]
 
 def new_board():
   #return a new board state
@@ -33,15 +42,6 @@ def render(board):
   print(Style.RESET_ALL)
 
 
-def get_all_available_moves(board):
-  legal_moves = []
-  for x, row in enumerate(board):
-    for y, val in enumerate(row):
-      if val is None:
-        legal_moves.append((x, y))
-  return legal_moves
-
-
 def get_human_moves():
   x_coord = input("What is your move's X co-ordinate?: ")
   y_coord = input("What is your move's Y co-ordinate?: ")
@@ -52,15 +52,23 @@ def get_human_moves():
 
   return (x_coord, y_coord)
 
-
-def get_ai_move(board):
-  available_moves = get_all_available_moves(board)
-  return random.choice(available_moves)
-
-
 def get_move(board, mode, player_id):
-  if mode == AVAILABLE_GAME_MODES["SINGLE_PLAYER"] and player_id % 2 != 0:
-    return get_ai_move(board)
+
+  if player_id % 2 != 0:
+    if mode == AVAILABLE_GAME_MODES["RANDOM_CHOICE_AI"]:
+      return ai.random_move(board)
+    elif mode == AVAILABLE_GAME_MODES["WINNING_MOVE_AI"]:
+      return ai.finds_winning_moves_ai(board, allowed_states[player_id % 2])
+    elif mode == AVAILABLE_GAME_MODES["BLOCK_WINNING_MOVE_AI"]:
+      my_move =  allowed_states[player_id % 2]
+      block_move = allowed_states[0]
+    
+      if my_move == allowed_states[0]:
+        block_move = allowed_states[1]
+      
+      return ai.blocks_winning_moves_ai(board, my_move, block_move)
+    elif mode == AVAILABLE_GAME_MODES["MINIMAX_AI"]:
+      return minimax.minimax_ai(board, allowed_states[player_id % 2])
   elif mode == AVAILABLE_GAME_MODES["TWO_PLAYER"] or player_id % 2 == 0:
     return get_human_moves()
 
@@ -85,30 +93,6 @@ def make_move(board, coordinates, user_move):
   board[x_coord][y_coord] = user_move
 
 
-def get_coord_count():
-  rows = []
-  for i in range(0,3):
-    row = []
-    for j in range(0,3):
-      row.append((i,j))
-    rows.append(row)
-
-  cols = []
-  for i in range(0,3):
-    col = []
-    for j in range(0,3):
-      col.append((j,i))
-    cols.append(col)
-
-  diagonals = [
-    [(0, 0), (1, 1), (2, 2)],
-    [(0, 2), (1, 1), (2, 0)]
-  ]
-
-  return rows + cols + diagonals
-
-  
-
 def has_winner(board):
   grouped_coords = get_coord_count()
 
@@ -131,27 +115,32 @@ def is_board_full(board):
   return True
 
 def select_mode():
-  user_inp = input("Enter 0 for Single player or 1 for Two player mode: ")
+  user_inp = input("Enter a choice: \n0 for Random choice AI,\n1 for Winning Moves AI,\n2 for Block winning moves AI,\n3 for minimax AI,\nAny other number for Two player mode: \n")
 
-  if int(user_inp) > 1:
+  if int(user_inp) > 3:
     print("Invalid input! Please enter a valid input!")
     sys.exit(0)
   if int(user_inp) == 0:
-    return AVAILABLE_GAME_MODES["SINGLE_PLAYER"]  
-    
-  return AVAILABLE_GAME_MODES["TWO_PLAYER"]
+    return AVAILABLE_GAME_MODES["RANDOM_CHOICE_AI"]
+  elif int(user_inp) == 1:
+    return AVAILABLE_GAME_MODES["WINNING_MOVE_AI"]
+  elif int(user_inp) == 2:
+    return AVAILABLE_GAME_MODES["BLOCK_WINNING_MOVE_AI"]
+  elif int(user_inp) == 3:
+    return AVAILABLE_GAME_MODES["MINIMAX_AI"]
+  else:
+    return AVAILABLE_GAME_MODES["TWO_PLAYER"]
 
 
 def main():
 
   selected_mode = select_mode()
   user_0 = input("Enter Player 1's name: ")
+  user_1 = "Zelda"
 
   print(selected_mode)
 
-  if selected_mode == AVAILABLE_GAME_MODES["SINGLE_PLAYER"]:
-    user_1 = "Zelda"
-  else:
+  if selected_mode == AVAILABLE_GAME_MODES["TWO_PLAYER"]:
     user_1 = input("Enter Player 2's name: ")
 
   print("Player 1 will use X")
@@ -162,23 +151,23 @@ def main():
     "O": user_1
   }
 
-  allowed_states = [
-    "X",
-    "O"
-  ]
-
   player_id = 0
 
   board = new_board()
+  # board = [
+  #   ["X", "O", "X"],
+  #   ["O", None, None],
+  #   ["O", "X", None]
+  # ]
 
   move_coords = None
 
   while True:
 
     render(board)
-    move_coords = get_move(board, selected_mode, player_id)
-
     user_move = allowed_states[player_id % 2]
+
+    move_coords = get_move(board, selected_mode, player_id)
 
     make_move(board, move_coords, user_move)
 
