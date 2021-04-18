@@ -2,6 +2,19 @@ from main import make_move, has_winner, is_board_full
 from utils import get_opponent, get_all_available_moves
 import copy
 
+cache = {}
+
+def _minimax_score(board, player_to_move, current_player):
+  cache_key = str(board)
+
+  if cache_key not in cache:
+    score = minimax_score(board, player_to_move, current_player)
+
+    cache[cache_key] = score
+
+  return cache[cache_key]
+
+
 def minimax_score(board, player_to_move, current_player):
 
   winner = has_winner(board)
@@ -46,7 +59,7 @@ def minimax_ai(board, player_state):
 
     opp = get_opponent(player_state)
 
-    score = minimax_score(_board, opp, player_state)
+    score = _minimax_score(_board, opp, player_state)
 
     if best_score is None or score > best_score:
       best_move = move
