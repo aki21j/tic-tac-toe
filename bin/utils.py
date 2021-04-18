@@ -28,3 +28,12 @@ def get_all_available_moves(board):
       if val is None:
         legal_moves.append((x, y))
   return legal_moves
+
+
+def get_opponent(who_am_i):
+  if who_am_i == 'X':
+    return 'O'
+  elif who_am_i == 'O':
+    return 'X'
+  else:
+    raise Exception("Unknown player: " + who_am_i)

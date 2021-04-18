@@ -2,11 +2,13 @@ import sys
 from colorama import Fore,Style
 import ai
 from utils import get_coord_count
+import minimax
 
 AVAILABLE_GAME_MODES = {
   "RANDOM_CHOICE_AI": "RANDOM_CHOICE_AI",
   "WINNING_MOVE_AI": "WINNING_MOVE_AI",
   "BLOCK_WINNING_MOVE_AI": "BLOCK_WINNING_MOVE_AI",
+  "MINIMAX_AI": "MINIMAX_AI",
   "TWO_PLAYER": "TWO_PLAYER"
 }
 
@@ -65,6 +67,8 @@ def get_move(board, mode, player_id):
         block_move = allowed_states[1]
       
       return ai.blocks_winning_moves_ai(board, my_move, block_move)
+    elif mode == AVAILABLE_GAME_MODES["MINIMAX_AI"]:
+      return minimax.minimax_ai(board, allowed_states[player_id % 2])
   elif mode == AVAILABLE_GAME_MODES["TWO_PLAYER"] or player_id % 2 == 0:
     return get_human_moves()
 
@@ -111,7 +115,7 @@ def is_board_full(board):
   return True
 
 def select_mode():
-  user_inp = input("Enter 0 for Random choice AI,1 for Winning Moves AI, 2 for Block winning moves AI and 3 for Two player mode: ")
+  user_inp = input("Enter a choice: \n0 for Random choice AI,\n1 for Winning Moves AI,\n2 for Block winning moves AI,\n3 for minimax AI,\nAny other number for Two player mode: \n")
 
   if int(user_inp) > 3:
     print("Invalid input! Please enter a valid input!")
@@ -122,6 +126,8 @@ def select_mode():
     return AVAILABLE_GAME_MODES["WINNING_MOVE_AI"]
   elif int(user_inp) == 2:
     return AVAILABLE_GAME_MODES["BLOCK_WINNING_MOVE_AI"]
+  elif int(user_inp) == 3:
+    return AVAILABLE_GAME_MODES["MINIMAX_AI"]
   else:
     return AVAILABLE_GAME_MODES["TWO_PLAYER"]
 
@@ -148,6 +154,11 @@ def main():
   player_id = 0
 
   board = new_board()
+  # board = [
+  #   ["X", "O", "X"],
+  #   ["O", None, None],
+  #   ["O", "X", None]
+  # ]
 
   move_coords = None
 
